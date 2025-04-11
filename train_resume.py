@@ -716,7 +716,7 @@ def main(args):
                 num_tokens=num_tokens, 
             ).to(accelerator.device, dtype=weight_dtype)
             # Debugging: Check if the processor has been added
-            print(f"CombinedAttnProcessor_double instantiated for {name}")
+            
             
             # Load the weights from the checkpoint dictionary into the corresponding layers
             for n in range(number):
@@ -742,14 +742,6 @@ def main(args):
     transformer.set_attn_processor(lora_attn_procs)
     # Debugging: Verify processor types
     
-    ##
-    for name, attn_processor in transformer.attn_processors.items():
-        if isinstance(attn_processor, CombinedAttnProcessor_double):
-            print(f"BBBBBBProcessor for {name} is of type CombinedAttnProcessor_double")
-        elif isinstance(attn_processor, CombinedAttnProcessor_single):
-            print(f"CCCCCCProcessor for {name} is of type CombinedAttnProcessor_single")
-        else:
-            print(f"DDDDDDProcessor for {name} is of unknown type: {type(attn_processor)}")
 
     transformer.train()
     for n, param in transformer.named_parameters():
@@ -1002,7 +994,14 @@ def main(args):
                     image_embeds = image_embeds.to(dtype=vae.dtype, device=accelerator.device)
 
                 ip_tokens = image_proj_model(image_embeds) # torch.Size([bsz, num_tokens, 4096])
-     
+                
+                # # 打印 transformer 的 forward 方法签名
+                # import inspect
+                # print(inspect.signature(transformer.forward))
+                # print(transformer)
+                # # IP-Adapter (newly added)  
+                
+
                 # Predict the noise residual
                 model_pred = transformer(
                     hidden_states=packed_noisy_model_input,

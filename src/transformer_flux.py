@@ -70,11 +70,13 @@ class FluxSingleTransformerBlock(nn.Module):
         self,
         hidden_states: torch.Tensor,
         cond_hidden_states: torch.Tensor,
+        encoder_hidden_states: torch.FloatTensor,##这里加了encoder_hidden_states
         temb: torch.Tensor,
         cond_temb: torch.Tensor,
         image_rotary_emb: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
         causal_attn=True,
         joint_attention_kwargs: Optional[Dict[str, Any]] = None,
+        image_emb=None,
     ) -> torch.Tensor:
         use_cond = cond_hidden_states is not None
         
@@ -95,12 +97,19 @@ class FluxSingleTransformerBlock(nn.Module):
             image_rotary_emb=image_rotary_emb,
             use_cond=use_cond,
             causal_attn=causal_attn,
+            image_emb=image_emb,
             **joint_attention_kwargs,
         )
         if use_cond:
             attn_output, cond_attn_output = attn_output
 
+
+        #维度有问题，差1024
+        print("attn_output shape:", attn_output.shape)
+        print("mlp_hidden_states shape:", mlp_hidden_states.shape)
         hidden_states = torch.cat([attn_output, mlp_hidden_states], dim=2)
+        
+
         gate = gate.unsqueeze(1)
         hidden_states = gate * self.proj_out(hidden_states)
         hidden_states = residual + hidden_states
@@ -185,10 +194,10 @@ class FluxTransformerBlock(nn.Module):
         cond_temb: torch.Tensor,
         image_rotary_emb: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
         causal_attn=True,
+        image_emb=None,
         joint_attention_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         use_cond = cond_hidden_states is not None
-        
         norm_hidden_states, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.norm1(hidden_states, emb=temb)
         if use_cond:
                 (
@@ -213,6 +222,7 @@ class FluxTransformerBlock(nn.Module):
             image_rotary_emb=image_rotary_emb,
             use_cond=use_cond,
             causal_attn=causal_attn,
+            image_emb=image_emb, # 这里进行了修改
             **joint_attention_kwargs,
         )
 
@@ -264,6 +274,8 @@ class FluxTransformerBlock(nn.Module):
             encoder_hidden_states = encoder_hidden_states.clip(-65504, 65504)
 
         return encoder_hidden_states, hidden_states, cond_hidden_states if use_cond else None
+
+
 
 
 class FluxTransformer2DModel(
@@ -481,6 +493,7 @@ class FluxTransformer2DModel(
         return_dict: bool = True,
         controlnet_blocks_repeat: bool = False,
         causal_attn: bool = True,
+        image_emb: torch.FloatTensor = None, # 这里进行了修改
     ) -> Union[torch.Tensor, Transformer2DModelOutput]:
         """
         The [`FluxTransformer2DModel`] forward method.
@@ -530,7 +543,6 @@ class FluxTransformer2DModel(
 
         hidden_states = self.x_embedder(hidden_states)
         cond_hidden_states = self.x_embedder(cond_hidden_states)
-
         timestep = timestep.to(hidden_states.dtype) * 1000
         if guidance is not None:
             guidance = guidance.to(hidden_states.dtype) * 1000
@@ -550,9 +562,7 @@ class FluxTransformer2DModel(
                     torch.ones_like(timestep) * 0, guidance, pooled_projections
                 )
             )
-        
         encoder_hidden_states = self.context_embedder(encoder_hidden_states)
-
         if txt_ids.ndim == 3:
             logger.warning(
                 "Passing `txt_ids` 3d torch.Tensor is deprecated."
@@ -573,7 +583,6 @@ class FluxTransformer2DModel(
             ip_adapter_image_embeds = joint_attention_kwargs.pop("ip_adapter_image_embeds")
             ip_hidden_states = self.encoder_hid_proj(ip_adapter_image_embeds)
             joint_attention_kwargs.update({"ip_hidden_states": ip_hidden_states})
-
         for index_block, block in enumerate(self.transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
 
@@ -592,6 +601,7 @@ class FluxTransformer2DModel(
                     hidden_states,
                     encoder_hidden_states,
                     temb,
+                    image_emb, #这里进行了修改
                     image_rotary_emb,
                     cond_temb=cond_temb if use_condition else None,
                     cond_hidden_states=cond_hidden_states if use_condition else None,
@@ -605,6 +615,7 @@ class FluxTransformer2DModel(
                     encoder_hidden_states=encoder_hidden_states,
                     cond_hidden_states=cond_hidden_states if use_condition else None,
                     temb=temb,
+                    image_emb=image_emb,# image_emb,
                     cond_temb=cond_temb if use_condition else None,
                     image_rotary_emb=image_rotary_emb,
                     causal_attn=causal_attn if use_condition else False,
@@ -622,6 +633,7 @@ class FluxTransformer2DModel(
                     )
                 else:
                     hidden_states = hidden_states + controlnet_block_samples[index_block // interval_control]
+        
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
 
         for index_block, block in enumerate(self.single_transformer_blocks):
@@ -641,6 +653,7 @@ class FluxTransformer2DModel(
                     create_custom_forward(block),
                     hidden_states,
                     temb,
+                    image_emb,#这里进行了修改
                     image_rotary_emb,
                     cond_temb=cond_temb if use_condition else None,
                     cond_hidden_states=cond_hidden_states if use_condition else None,
@@ -652,7 +665,9 @@ class FluxTransformer2DModel(
                 hidden_states, cond_hidden_states = block(
                     hidden_states=hidden_states,
                     cond_hidden_states=cond_hidden_states if use_condition else None,
+                    encoder_hidden_states=encoder_hidden_states,
                     temb=temb,
+                    image_emb=image_emb,
                     cond_temb=cond_temb if use_condition else None,
                     image_rotary_emb=image_rotary_emb,
                     causal_attn=causal_attn if use_condition else False,

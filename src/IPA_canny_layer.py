@@ -155,7 +155,7 @@ class CombinedAttnProcessor_double(nn.Module):
         encoder_hidden_states: torch.FloatTensor,
         attention_mask: Optional[torch.FloatTensor] = None,
         image_rotary_emb: Optional[torch.Tensor] = None,
-        use_cond: bool = False,
+        use_cond: bool = True,#这里进行了修改
         causal_attn: bool = True
     ) -> torch.FloatTensor:
         """
@@ -314,188 +314,128 @@ class CombinedAttnProcessor_single(nn.Module):
       - 如未提供 encoder_hidden_states 但 use_cond=True，则按 cond_width/cond_height 和 n_loras 计算条件 token 数量，
         构造遮罩（可选 causal_attn）并在注意力后将输出分为主输出和条件输出
     """
-    def __init__(
-        self,
-        dim: int,  # 使用 dim 参数
-        cross_attention_dim: Optional[int] = None,
-        scale: float = 1.0,
-        num_tokens: int = 4,
-        ranks: list = [],
-        lora_weights: list = [],
-        network_alphas: list = [],
-        device=None,
-        dtype=None,
-        cond_width: int = 512,
-        cond_height: int = 512,
-        n_loras: int = 1,
-        hidden_size: Optional[int] = None,
-    ):
+    def __init__(self, dim,hidden_size, cross_attention_dim=None, scale=1.0, num_tokens=4, ranks=[], lora_weights=[], network_alphas=[], device=None, dtype=None, cond_width=512, cond_height=512, n_loras=1):
         super().__init__()
-        self.dim = dim  # 将 dim 参数作为类的一个属性
-        self.hidden_size = dim  # 使用 dim 作为 hidden_size
+
+        # Initialize the regular attention parameters
+        self.hidden_size = hidden_size
         self.cross_attention_dim = cross_attention_dim
         self.scale = scale
         self.num_tokens = num_tokens
         
-        # LoRA 层：分别用于 Q, K, V 的微调（参数 lora_weights 用于缩放，n_loras 是 LoRA 层数）
+        self.to_k_ip = nn.Linear(cross_attention_dim or hidden_size, hidden_size, bias=False)
+        self.to_v_ip = nn.Linear(cross_attention_dim or hidden_size, hidden_size, bias=False)
+        
+        self.norm_added_k = RMSNorm(128, eps=1e-5, elementwise_affine=False)
+        
+        # Initialize LoRA layers
         self.n_loras = n_loras
         self.cond_width = cond_width
         self.cond_height = cond_height
-        self.lora_weights = lora_weights
         
         self.q_loras = nn.ModuleList([
-            LoRALinearLayer(dim, dim, ranks[i], network_alphas[i],
-                            device=device, dtype=dtype, cond_width=cond_width, cond_height=cond_height,
-                            number=i, n_loras=n_loras)
+            LoRALinearLayer(dim, dim, ranks[i], network_alphas[i], device=device, dtype=dtype, cond_width=cond_width, cond_height=cond_height, number=i, n_loras=n_loras)
             for i in range(n_loras)
         ])
         self.k_loras = nn.ModuleList([
-            LoRALinearLayer(dim, dim, ranks[i], network_alphas[i],
-                            device=device, dtype=dtype, cond_width=cond_width, cond_height=cond_height,
-                            number=i, n_loras=n_loras)
+            LoRALinearLayer(dim, dim, ranks[i], network_alphas[i], device=device, dtype=dtype, cond_width=cond_width, cond_height=cond_height, number=i, n_loras=n_loras)
             for i in range(n_loras)
         ])
         self.v_loras = nn.ModuleList([
-            LoRALinearLayer(dim, dim, ranks[i], network_alphas[i],
-                            device=device, dtype=dtype, cond_width=cond_width, cond_height=cond_height,
-                            number=i, n_loras=n_loras)
+            LoRALinearLayer(dim, dim, ranks[i], network_alphas[i], device=device, dtype=dtype, cond_width=cond_width, cond_height=cond_height, number=i, n_loras=n_loras)
             for i in range(n_loras)
         ])
-        
-        # ip-adapter 层（来自 IPAFluxAttnProcessor2_0）
-        self.to_k_ip = nn.Linear(cross_attention_dim or dim, dim, bias=False)
-        self.to_v_ip = nn.Linear(cross_attention_dim or dim, dim, bias=False)
-        # 此处 128 通常与 head_dim 对应，可根据实际情况调整
-        self.norm_added_k = RMSNorm(128, eps=1e-5, elementwise_affine=False)
+        self.lora_weights = lora_weights
 
-    def __call__(
-        self,
-        attn:Attention,
-        hidden_states: torch.FloatTensor,
-        image_emb: torch.FloatTensor,
-        encoder_hidden_states: torch.FloatTensor,
-        attention_mask: Optional[torch.FloatTensor] = None,
-        image_rotary_emb: Optional[torch.Tensor] = None,
-        use_cond: bool = False,
-        causal_attn: bool = True
-    ) -> torch.FloatTensor:
-        """
-        参数说明：
-          - attn：包含必要投影层（to_q, to_k, to_v）、归一化层（norm_q, norm_k）以及后处理层（to_out, to_add_out）
-          - hidden_states：主序列输入
-          - image_emb：当不为 None 时，利用 ip-adapter 分支进行额外的注意力计算
-          - encoder_hidden_states：额外上下文信息，用于 context attention 分支（如果不为 None，则优先使用此分支）
-          - attention_mask：当前未使用，可扩展传入
-          - image_rotary_emb：旋转位置编码，如不为 None，则用于 Q 与 K 的旋转
-          - use_cond：如果无 encoder_hidden_states 但需要条件输出，则设置为 True，输出将分为主输出与条件输出
-          - causal_attn：在 use_cond 分支中是否构造因果遮罩
-        """
-        # 若 encoder_hidden_states 存在，则按其批次大小获取 batch_size，否则从 hidden_states 获取
-        batch_size = hidden_states.shape[0] if encoder_hidden_states is None else encoder_hidden_states.shape[0]
-        
-        # 1. 基本的 Q, K, V 投影
+    def __call__(self,
+                 attn: Attention,
+                 hidden_states: torch.FloatTensor,
+                 cond_hidden_states: torch.FloatTensor = None,
+                 encoder_hidden_states: torch.FloatTensor = None,
+                 attention_mask: Optional[torch.FloatTensor] = None,
+                 image_rotary_emb: Optional[torch.Tensor] = None,
+                 image_emb: Optional[torch.FloatTensor] = None,
+                 use_cond=False,
+                 causal_attn=True) -> torch.FloatTensor:
+        batch_size, seq_len, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
+
+        # Regular attention projections
         query = attn.to_q(hidden_states)
         key = attn.to_k(hidden_states)
         value = attn.to_v(hidden_states)
-        
-        # 2. 添加 LoRA 调整（对 hidden_states 进行微调后加到 Q, K, V 上）
+
+        # Apply LoRA to projections
         for i in range(self.n_loras):
             query = query + self.lora_weights[i] * self.q_loras[i](hidden_states)
             key = key + self.lora_weights[i] * self.k_loras[i](hidden_states)
             value = value + self.lora_weights[i] * self.v_loras[i](hidden_states)
-        
+
+        # Reshape for multi-head attention
         inner_dim = key.shape[-1]
         head_dim = inner_dim // attn.heads
-        
-        # 3. 重塑 Q, K, V 到 (batch, heads, seq_len, head_dim)
+
         query = query.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
         key = key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
         value = value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-        
+
+        # Normalize if needed
         if attn.norm_q is not None:
             query = attn.norm_q(query)
         if attn.norm_k is not None:
             key = attn.norm_k(key)
-        
-        # 4. 如果提供 image_rotary_emb，则对 Q 和 K 应用旋转位置编码
+
         if image_rotary_emb is not None:
             from diffusers.models.embeddings import apply_rotary_emb
             query = apply_rotary_emb(query, image_rotary_emb)
             key = apply_rotary_emb(key, image_rotary_emb)
-        
-        # 5. ip-adapter 分支：如果提供 image_emb，则计算额外的注意力输出
-        if image_emb is not None:
-            ip_hidden = image_emb
-            ip_hidden_key = self.to_k_ip(ip_hidden)
-            ip_hidden_value = self.to_v_ip(ip_hidden)
-            ip_hidden_key = ip_hidden_key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-            ip_hidden_value = ip_hidden_value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-            ip_hidden_key = self.norm_added_k(ip_hidden_key)
-            ip_attn = F.scaled_dot_product_attention(query, ip_hidden_key, ip_hidden_value,
-                                                     dropout_p=0.0, is_causal=False)
-            ip_attn = ip_attn.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
-            ip_attn = ip_attn.to(query.dtype)
-        # 6. 根据情况选择分支：
-        # （1）如果 encoder_hidden_states 存在，使用 context 投影
-        if encoder_hidden_states is not None:
-            enc_q = attn.add_q_proj(encoder_hidden_states)
-            enc_k = attn.add_k_proj(encoder_hidden_states)
-            enc_v = attn.add_v_proj(encoder_hidden_states)
-            
-            enc_q = enc_q.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-            enc_k = enc_k.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-            enc_v = enc_v.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-            
-            if attn.norm_added_q is not None:
-                enc_q = attn.norm_added_q(enc_q)
-            if attn.norm_added_k is not None:
-                enc_k = attn.norm_added_k(enc_k)
-            
-            # 拼接 context 投影与主投影：按 token 维度拼接
-            query = torch.cat([enc_q, query], dim=2)
-            key = torch.cat([enc_k, key], dim=2)
-            value = torch.cat([enc_v, value], dim=2)
-            
-            mask = None  # 此分支下不使用额外遮罩
-        
+
         if causal_attn:
-            # 根据 cond_width 和 cond_height 计算条件 token 数量（与 second 类保持一致）
-            cond_size = (self.cond_width // 8) * (self.cond_height // 8) * 16 // 64
-            # 假设输入 hidden_states 的 token 数量中后面部分为条件部分
-            block_size = hidden_states.shape[1] - cond_size * self.n_loras
-            scaled_seq_len = query.shape[2]
-            scaled_block_size = block_size
+            cond_size = self.cond_width // 8 * self.cond_height // 8 * 16 // 64
+            block_size = seq_len - cond_size * self.n_loras
             scaled_cond_size = cond_size
+            scaled_block_size = block_size
+            scaled_seq_len = query.shape[2]
+
+            num_cond_blocks = self.n_loras
             mask = torch.ones((scaled_seq_len, scaled_seq_len), device=hidden_states.device)
-            mask[:scaled_block_size, :] = 0
-            for i in range(self.n_loras):
+            mask[:scaled_block_size, :] = 0  # First block_size row
+            for i in range(num_cond_blocks):
                 start = i * scaled_cond_size + scaled_block_size
                 end = (i + 1) * scaled_cond_size + scaled_block_size
-                mask[start:end, start:end] = 0
+                mask[start:end, start:end] = 0  # Diagonal blocks
             mask = mask * -1e20
             mask = mask.to(query.dtype)
         else:
             mask = None
-        
-        # 7. 进行注意力计算
-        attn_out = F.scaled_dot_product_attention(query, key, value, dropout_p=0.0, is_causal=False, attn_mask=mask)
-        attn_out = attn_out.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
-        
-        # 8. 后处理：不同分支下对注意力输出进行不同处理
-        if encoder_hidden_states is not None:
-            enc_len = encoder_hidden_states.shape[1]
-            # 前 enc_len 个 token 为 context 输出，剩下为主输出
-            enc_out = attn_out[:, :enc_len, :]
-            main_out = attn_out[:, enc_len:, :]
-            if image_emb is not None:
-                main_out = main_out + self.scale * ip_attn
-            # 利用 attn.to_out[0] 与 attn.to_out[1] 进行主输出的线性与 dropout 投影
-            main_out = attn.to_out[0](main_out)
-            main_out = attn.to_out[1](main_out)
-            # 对 context 输出调用 attn.to_add_out
-            enc_out = attn.to_add_out(enc_out)
-            return main_out, enc_out
+
+        # Attention computation
+        hidden_states = F.scaled_dot_product_attention(query, key, value, dropout_p=0.0, is_causal=False, attn_mask=mask)
+        hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+        hidden_states = hidden_states.to(query.dtype)
+
+        # If image_emb is provided, integrate it into the hidden states
+        if image_emb is not None:
+            ip_hidden_states = self.to_k_ip(image_emb)
+            ip_hidden_states_value_proj = self.to_v_ip(image_emb)
+            ip_hidden_states = ip_hidden_states.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
+            ip_hidden_states_value_proj = ip_hidden_states_value_proj.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
+
+            ip_hidden_states = self.norm_added_k(ip_hidden_states)
+
+            # Add image embeddings to hidden states
+            ip_hidden_states = F.scaled_dot_product_attention(query, 
+                                                              ip_hidden_states, 
+                                                              ip_hidden_states_value_proj, 
+                                                              dropout_p=0.0, is_causal=False)
+            ip_hidden_states = ip_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+            ip_hidden_states = ip_hidden_states.to(query.dtype)
+
+            hidden_states = hidden_states + self.scale * ip_hidden_states
+
+        # Split hidden states if conditional hidden states are provided
+        if use_cond:
+            cond_hidden_states = hidden_states[:, block_size:, :]
+            hidden_states = hidden_states[:, :block_size, :]
+            return hidden_states, cond_hidden_states
         else:
-            if image_emb is not None:
-                attn_out = attn_out + self.scale * ip_attn
-            return attn_out
+            return hidden_states
