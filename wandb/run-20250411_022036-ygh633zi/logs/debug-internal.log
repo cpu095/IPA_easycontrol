@@ -1,0 +1,11 @@
+{"time":"2025-04-11T02:20:37.256916162+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_022036-ygh633zi/logs/debug-core.log"}
+{"time":"2025-04-11T02:20:37.62372874+08:00","level":"INFO","msg":"created new stream","id":"ygh633zi"}
+{"time":"2025-04-11T02:20:37.632422481+08:00","level":"INFO","msg":"stream: started","id":"ygh633zi"}
+{"time":"2025-04-11T02:20:37.63245371+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"ygh633zi"}
+{"time":"2025-04-11T02:20:37.63246308+08:00","level":"INFO","msg":"sender: started","stream_id":"ygh633zi"}
+{"time":"2025-04-11T02:20:37.632486339+08:00","level":"INFO","msg":"handler: started","stream_id":"ygh633zi"}
+{"time":"2025-04-11T02:20:38.232756895+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T02:20:49.517233511+08:00","level":"INFO","msg":"stream: closing","id":"ygh633zi"}
+{"time":"2025-04-11T02:20:49.5172847+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T02:20:49.518037581+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T02:20:50.502649024+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}

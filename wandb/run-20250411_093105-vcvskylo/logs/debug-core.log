@@ -1,0 +1,13 @@
+{"time":"2025-04-11T09:31:04.166874999+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmp9_gfu7v0/port-3921064.txt","pid":3921064,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-04-11T09:31:04.169471614+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":3921064}
+{"time":"2025-04-11T09:31:04.169449085+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":45549,"Zone":""}}
+{"time":"2025-04-11T09:31:04.339073068+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:05.448736119+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"vcvskylo","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:05.735232473+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"vcvskylo","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:18.886499292+08:00","level":"INFO","msg":"handleInformTeardown: server teardown initiated","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:18.886564441+08:00","level":"INFO","msg":"connection: closing","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:18.88659081+08:00","level":"INFO","msg":"server is shutting down"}
+{"time":"2025-04-11T09:31:18.886676148+08:00","level":"INFO","msg":"connection: closed successfully","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:20.675205104+08:00","level":"INFO","msg":"handleInformTeardown: server shutdown complete","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:20.675231103+08:00","level":"INFO","msg":"connection: ManageConnectionData: connection closed","id":"127.0.0.1:52612"}
+{"time":"2025-04-11T09:31:20.675239453+08:00","level":"INFO","msg":"server is closed"}

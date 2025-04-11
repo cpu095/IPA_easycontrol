@@ -1,0 +1,15 @@
+{"time":"2025-04-11T02:04:15.81373271+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_020415-dygl7mvw/logs/debug-core.log"}
+{"time":"2025-04-11T02:04:16.043354253+08:00","level":"INFO","msg":"created new stream","id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:16.045170208+08:00","level":"INFO","msg":"stream: started","id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:16.045188107+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:16.045199027+08:00","level":"INFO","msg":"handler: started","stream_id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:16.045211857+08:00","level":"INFO","msg":"sender: started","stream_id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:16.693771353+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T02:04:26.434868841+08:00","level":"INFO","msg":"stream: closing","id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:26.43491789+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T02:04:26.435458386+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T02:04:27.304444618+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-11T02:04:27.969105479+08:00","level":"INFO","msg":"handler: closed","stream_id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:27.969131788+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:27.969145218+08:00","level":"INFO","msg":"sender: closed","stream_id":"dygl7mvw"}
+{"time":"2025-04-11T02:04:28.030253658+08:00","level":"INFO","msg":"stream: closed","id":"dygl7mvw"}

@@ -1,0 +1,72 @@
+04/11/2025 02:04:24 - INFO - __main__ - ***** Running training *****
+04/11/2025 02:04:24 - INFO - __main__ -   Num examples = 2810674
+04/11/2025 02:04:24 - INFO - __main__ -   Num batches each epoch = 702669
+04/11/2025 02:04:24 - INFO - __main__ -   Num Epochs = 1000
+04/11/2025 02:04:24 - INFO - __main__ -   Instantaneous batch size per device = 1
+04/11/2025 02:04:24 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 4
+04/11/2025 02:04:24 - INFO - __main__ -   Gradient Accumulation steps = 1
+04/11/2025 02:04:24 - INFO - __main__ -   Total optimization steps = 702669000
+Steps:   0%|                                                                                         | 0/702669000 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 1143, in <module>
+    main(args)
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 983, in main
+    image_embeds = image_encoder(batch["clip_images"].to(accelerator.device, dtype=torch.float32).to(accelerator.device)).pooler_output
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/transformers/models/siglip/modeling_siglip.py", line 1190, in forward
+    return self.vision_model(
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/transformers/models/siglip/modeling_siglip.py", line 1089, in forward
+    hidden_states = self.embeddings(pixel_values, interpolate_pos_encoding=interpolate_pos_encoding)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/transformers/models/siglip/modeling_siglip.py", line 311, in forward
+    patch_embeds = self.patch_embedding(pixel_values)  # shape = [*, width, grid, grid]
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 554, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 549, in _conv_forward
+    return F.conv2d(
+RuntimeError: Input type (torch.cuda.FloatTensor) and weight type (torch.FloatTensor) should be the same
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 1143, in <module>
+[rank0]:     main(args)
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 983, in main
+[rank0]:     image_embeds = image_encoder(batch["clip_images"].to(accelerator.device, dtype=torch.float32).to(accelerator.device)).pooler_output
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/transformers/models/siglip/modeling_siglip.py", line 1190, in forward
+[rank0]:     return self.vision_model(
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/transformers/models/siglip/modeling_siglip.py", line 1089, in forward
+[rank0]:     hidden_states = self.embeddings(pixel_values, interpolate_pos_encoding=interpolate_pos_encoding)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/transformers/models/siglip/modeling_siglip.py", line 311, in forward
+[rank0]:     patch_embeds = self.patch_embedding(pixel_values)  # shape = [*, width, grid, grid]
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 554, in forward
+[rank0]:     return self._conv_forward(input, self.weight, self.bias)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 549, in _conv_forward
+[rank0]:     return F.conv2d(
+[rank0]: RuntimeError: Input type (torch.cuda.FloatTensor) and weight type (torch.FloatTensor) should be the same

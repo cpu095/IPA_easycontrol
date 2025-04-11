@@ -1,0 +1,15 @@
+{"time":"2025-04-11T04:10:30.390349574+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_041029-pslrpabt/logs/debug-core.log"}
+{"time":"2025-04-11T04:10:30.665004154+08:00","level":"INFO","msg":"created new stream","id":"pslrpabt"}
+{"time":"2025-04-11T04:10:30.677734454+08:00","level":"INFO","msg":"stream: started","id":"pslrpabt"}
+{"time":"2025-04-11T04:10:30.677768143+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"pslrpabt"}
+{"time":"2025-04-11T04:10:30.677785772+08:00","level":"INFO","msg":"handler: started","stream_id":"pslrpabt"}
+{"time":"2025-04-11T04:10:30.677785132+08:00","level":"INFO","msg":"sender: started","stream_id":"pslrpabt"}
+{"time":"2025-04-11T04:10:31.351628116+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T04:10:48.587352709+08:00","level":"INFO","msg":"stream: closing","id":"pslrpabt"}
+{"time":"2025-04-11T04:10:48.587419877+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T04:10:48.588073471+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T04:10:49.812012156+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-11T04:10:50.346641267+08:00","level":"INFO","msg":"handler: closed","stream_id":"pslrpabt"}
+{"time":"2025-04-11T04:10:50.346718715+08:00","level":"INFO","msg":"sender: closed","stream_id":"pslrpabt"}
+{"time":"2025-04-11T04:10:50.346666817+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"pslrpabt"}
+{"time":"2025-04-11T04:10:50.401106855+08:00","level":"INFO","msg":"stream: closed","id":"pslrpabt"}

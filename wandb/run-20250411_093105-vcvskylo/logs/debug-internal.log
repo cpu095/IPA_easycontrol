@@ -1,0 +1,15 @@
+{"time":"2025-04-11T09:31:05.480133819+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_093105-vcvskylo/logs/debug-core.log"}
+{"time":"2025-04-11T09:31:05.734727986+08:00","level":"INFO","msg":"created new stream","id":"vcvskylo"}
+{"time":"2025-04-11T09:31:05.735220783+08:00","level":"INFO","msg":"stream: started","id":"vcvskylo"}
+{"time":"2025-04-11T09:31:05.735246143+08:00","level":"INFO","msg":"sender: started","stream_id":"vcvskylo"}
+{"time":"2025-04-11T09:31:05.735255833+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"vcvskylo"}
+{"time":"2025-04-11T09:31:05.735255513+08:00","level":"INFO","msg":"handler: started","stream_id":"vcvskylo"}
+{"time":"2025-04-11T09:31:06.383979396+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T09:31:18.886629199+08:00","level":"INFO","msg":"stream: closing","id":"vcvskylo"}
+{"time":"2025-04-11T09:31:18.886719237+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T09:31:18.887490317+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T09:31:19.99904322+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-11T09:31:20.669746631+08:00","level":"INFO","msg":"handler: closed","stream_id":"vcvskylo"}
+{"time":"2025-04-11T09:31:20.66979519+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"vcvskylo"}
+{"time":"2025-04-11T09:31:20.66981121+08:00","level":"INFO","msg":"sender: closed","stream_id":"vcvskylo"}
+{"time":"2025-04-11T09:31:20.675011089+08:00","level":"INFO","msg":"stream: closed","id":"vcvskylo"}

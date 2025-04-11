@@ -1,0 +1,85 @@
+04/11/2025 01:11:01 - INFO - __main__ - ***** Running training *****
+04/11/2025 01:11:01 - INFO - __main__ -   Num examples = 2810674
+04/11/2025 01:11:01 - INFO - __main__ -   Num batches each epoch = 702669
+04/11/2025 01:11:01 - INFO - __main__ -   Num Epochs = 1000
+04/11/2025 01:11:01 - INFO - __main__ -   Instantaneous batch size per device = 1
+04/11/2025 01:11:01 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 4
+04/11/2025 01:11:01 - INFO - __main__ -   Gradient Accumulation steps = 1
+04/11/2025 01:11:01 - INFO - __main__ -   Total optimization steps = 702669000
+Steps:   0%|                                                                                         | 0/702669000 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 1142, in <module>
+    main(args)
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 873, in main
+    for step, batch in enumerate(train_dataloader):
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/accelerate/data_loader.py", line 552, in __iter__
+    current_batch = next(dataloader_iter)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 701, in __next__
+    data = self._next_data()
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1465, in _next_data
+    return self._process_data(data)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1491, in _process_data
+    data.reraise()
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/_utils.py", line 715, in reraise
+    raise exception
+AttributeError: Caught AttributeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py", line 351, in _worker_loop
+    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 50, in fetch
+    data = self.dataset.__getitems__(possibly_batched_index)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 2766, in __getitems__
+    batch = self.__getitem__(keys)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 2762, in __getitem__
+    return self._getitem(key)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 2747, in _getitem
+    formatted_output = format_table(
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/formatting/formatting.py", line 639, in format_table
+    return formatter(pa_table, query_type=query_type)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/formatting/formatting.py", line 407, in __call__
+    return self.format_batch(pa_table)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/formatting/formatting.py", line 522, in format_batch
+    return self.transform(batch)
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/src/jsonl_datasets.py", line 189, in preprocess_train
+    clip_images = [clip_image_processor(images=Image.open(examples[args.image_column][i]).convert("RGB"), return_tensors="pt").pixel_values for i in range(len(examples[target_column]))]
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/src/jsonl_datasets.py", line 189, in <listcomp>
+    clip_images = [clip_image_processor(images=Image.open(examples[args.image_column][i]).convert("RGB"), return_tensors="pt").pixel_values for i in range(len(examples[target_column]))]
+AttributeError: 'Namespace' object has no attribute 'image_column'. Did you mean: 'target_column'?
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 1142, in <module>
+[rank0]:     main(args)
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 873, in main
+[rank0]:     for step, batch in enumerate(train_dataloader):
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/accelerate/data_loader.py", line 552, in __iter__
+[rank0]:     current_batch = next(dataloader_iter)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 701, in __next__
+[rank0]:     data = self._next_data()
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1465, in _next_data
+[rank0]:     return self._process_data(data)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1491, in _process_data
+[rank0]:     data.reraise()
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/_utils.py", line 715, in reraise
+[rank0]:     raise exception
+[rank0]: AttributeError: Caught AttributeError in DataLoader worker process 0.
+[rank0]: Original Traceback (most recent call last):
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py", line 351, in _worker_loop
+[rank0]:     data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 50, in fetch
+[rank0]:     data = self.dataset.__getitems__(possibly_batched_index)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 2766, in __getitems__
+[rank0]:     batch = self.__getitem__(keys)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 2762, in __getitem__
+[rank0]:     return self._getitem(key)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 2747, in _getitem
+[rank0]:     formatted_output = format_table(
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/formatting/formatting.py", line 639, in format_table
+[rank0]:     return formatter(pa_table, query_type=query_type)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/formatting/formatting.py", line 407, in __call__
+[rank0]:     return self.format_batch(pa_table)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/datasets/formatting/formatting.py", line 522, in format_batch
+[rank0]:     return self.transform(batch)
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/src/jsonl_datasets.py", line 189, in preprocess_train
+[rank0]:     clip_images = [clip_image_processor(images=Image.open(examples[args.image_column][i]).convert("RGB"), return_tensors="pt").pixel_values for i in range(len(examples[target_column]))]
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/src/jsonl_datasets.py", line 189, in <listcomp>
+[rank0]:     clip_images = [clip_image_processor(images=Image.open(examples[args.image_column][i]).convert("RGB"), return_tensors="pt").pixel_values for i in range(len(examples[target_column]))]
+[rank0]: AttributeError: 'Namespace' object has no attribute 'image_column'. Did you mean: 'target_column'?

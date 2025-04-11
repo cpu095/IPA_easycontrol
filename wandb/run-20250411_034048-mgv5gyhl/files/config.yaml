@@ -1,0 +1,166 @@
+_wandb:
+    value:
+        cli_version: 0.19.7
+        m: []
+        python_version: 3.10.16
+        t:
+            "1":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 51
+                - 55
+                - 71
+                - 83
+                - 98
+                - 105
+            "2":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 51
+                - 55
+                - 71
+                - 83
+                - 98
+                - 105
+            "3":
+                - 23
+                - 55
+            "4": 3.10.16
+            "5": 0.19.7
+            "6": 4.46.3
+            "8":
+                - 5
+            "12": 0.19.7
+            "13": linux-x86_64
+adam_beta1:
+    value: 0.9
+adam_beta2:
+    value: 0.999
+adam_epsilon:
+    value: 1e-08
+adam_weight_decay:
+    value: 0.0001
+adam_weight_decay_text_encoder:
+    value: 0.001
+cache_latents:
+    value: false
+caption_column:
+    value: prompt
+checkpointing_steps:
+    value: 1000
+checkpoints_total_limit:
+    value: null
+cond_size:
+    value: 512
+dataloader_num_workers:
+    value: 8
+gradient_accumulation_steps:
+    value: 1
+gradient_checkpointing:
+    value: false
+guidance_scale:
+    value: 1
+learning_rate:
+    value: 0.0001
+logging_dir:
+    value: /opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/models/blurred_model_0411/log
+logit_mean:
+    value: 0
+logit_std:
+    value: 1
+lora_num:
+    value: 1
+lr_num_cycles:
+    value: 1
+lr_power:
+    value: 1
+lr_scheduler:
+    value: constant
+lr_warmup_steps:
+    value: 500
+max_grad_norm:
+    value: 1
+max_sequence_length:
+    value: 512
+max_train_steps:
+    value: 702669000
+mixed_precision:
+    value: bf16
+mode_scale:
+    value: 1.29
+network_alphas:
+    value:
+        - 128
+noise_size:
+    value: 1024
+num_train_epochs:
+    value: 1000
+num_validation_images:
+    value: 2
+optimizer:
+    value: AdamW
+output_dir:
+    value: /opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/models/blurred_model_0411
+pretrained_lora_path:
+    value: /opt/liblibai-models/user-workspace/songyiren/FYP/sjc/redux/models/blurred_model_0408/checkpoint-1000/lora.safetensors
+pretrained_model_name_or_path:
+    value: /opt/liblibai-models/model-weights/black-forest-labs/FLUX.1-dev
+prodigy_beta3:
+    value: null
+prodigy_decouple:
+    value: true
+prodigy_safeguard_warmup:
+    value: true
+prodigy_use_bias_correction:
+    value: true
+ranks:
+    value:
+        - 128
+repeats:
+    value: 1
+report_to:
+    value: wandb
+resume_from_checkpoint:
+    value: null
+revision:
+    value: null
+scale_lr:
+    value: false
+seed:
+    value: null
+spacial_column:
+    value: control_canny
+spatial_test_images:
+    value:
+        - /opt/liblibai-models/user-workspace/zhangyuxuan/project/easycontrol/code0221/test_imgs/canny.jpg
+subject_column:
+    value: null
+subject_test_images:
+    value:
+        - None
+target_column:
+    value: source
+test_h:
+    value: 1024
+test_w:
+    value: 1024
+train_batch_size:
+    value: 1
+train_data_dir:
+    value: /opt/liblibai-models/user-workspace/zhangyuxuan/project/gc_project/projects2/data_process/unicontrol/canny_all.jsonl
+upcast_before_saving:
+    value: false
+use_8bit_adam:
+    value: false
+validation_prompt:
+    value: A bird in a library
+validation_steps:
+    value: 1000
+variant:
+    value: null
+weighting_scheme:
+    value: none

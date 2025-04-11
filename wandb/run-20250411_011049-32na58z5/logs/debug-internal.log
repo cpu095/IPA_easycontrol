@@ -1,0 +1,11 @@
+{"time":"2025-04-11T01:10:50.412535+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_011049-32na58z5/logs/debug-core.log"}
+{"time":"2025-04-11T01:10:50.741915586+08:00","level":"INFO","msg":"created new stream","id":"32na58z5"}
+{"time":"2025-04-11T01:10:50.741981564+08:00","level":"INFO","msg":"stream: started","id":"32na58z5"}
+{"time":"2025-04-11T01:10:50.742408703+08:00","level":"INFO","msg":"handler: started","stream_id":"32na58z5"}
+{"time":"2025-04-11T01:10:50.742408903+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"32na58z5"}
+{"time":"2025-04-11T01:10:50.742748545+08:00","level":"INFO","msg":"sender: started","stream_id":"32na58z5"}
+{"time":"2025-04-11T01:10:51.416713223+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T01:11:03.128914231+08:00","level":"INFO","msg":"stream: closing","id":"32na58z5"}
+{"time":"2025-04-11T01:11:03.129016818+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T01:11:03.130075021+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T01:11:04.12324872+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}

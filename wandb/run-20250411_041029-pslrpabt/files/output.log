@@ -1,0 +1,56 @@
+04/11/2025 04:10:42 - INFO - __main__ - ***** Running training *****
+04/11/2025 04:10:42 - INFO - __main__ -   Num examples = 2810674
+04/11/2025 04:10:42 - INFO - __main__ -   Num batches each epoch = 702669
+04/11/2025 04:10:42 - INFO - __main__ -   Num Epochs = 1000
+04/11/2025 04:10:42 - INFO - __main__ -   Instantaneous batch size per device = 1
+04/11/2025 04:10:42 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 4
+04/11/2025 04:10:42 - INFO - __main__ -   Gradient Accumulation steps = 1
+04/11/2025 04:10:42 - INFO - __main__ -   Total optimization steps = 702669000
+Steps:   0%|                                                                                         | 0/702669000 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 1149, in <module>
+    main(args)
+  File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 994, in main
+    model_pred = transformer(
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1643, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1459, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/accelerate/utils/operations.py", line 823, in forward
+    return model_forward(*args, **kwargs)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/accelerate/utils/operations.py", line 811, in __call__
+    return convert_to_fp32(self.model_forward(*args, **kwargs))
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/amp/autocast_mode.py", line 44, in decorate_autocast
+    return func(*args, **kwargs)
+TypeError: FluxTransformer2DModel.forward() got an unexpected keyword argument 'ip_adapter_image_embeds'
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 1149, in <module>
+[rank0]:     main(args)
+[rank0]:   File "/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/train_resume.py", line 994, in main
+[rank0]:     model_pred = transformer(
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1643, in forward
+[rank0]:     else self._run_ddp_forward(*inputs, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1459, in _run_ddp_forward
+[rank0]:     return self.module(*inputs, **kwargs)  # type: ignore[index]
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/accelerate/utils/operations.py", line 823, in forward
+[rank0]:     return model_forward(*args, **kwargs)
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/accelerate/utils/operations.py", line 811, in __call__
+[rank0]:     return convert_to_fp32(self.model_forward(*args, **kwargs))
+[rank0]:   File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/torch/amp/autocast_mode.py", line 44, in decorate_autocast
+[rank0]:     return func(*args, **kwargs)
+[rank0]: TypeError: FluxTransformer2DModel.forward() got an unexpected keyword argument 'ip_adapter_image_embeds'

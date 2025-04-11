@@ -1,0 +1,42 @@
+2025-04-11 09:45:06,355 INFO    MainThread:3982231 [wandb_setup.py:_flush():67] Current SDK version is 0.19.7
+2025-04-11 09:45:06,357 INFO    MainThread:3982231 [wandb_setup.py:_flush():67] Configure stats pid to 3982231
+2025-04-11 09:45:06,357 INFO    MainThread:3982231 [wandb_setup.py:_flush():67] Loading settings from /root/.config/wandb/settings
+2025-04-11 09:45:06,357 INFO    MainThread:3982231 [wandb_setup.py:_flush():67] Loading settings from /opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/settings
+2025-04-11 09:45:06,357 INFO    MainThread:3982231 [wandb_setup.py:_flush():67] Loading settings from environment variables
+2025-04-11 09:45:06,357 INFO    MainThread:3982231 [wandb_init.py:setup_run_log_directory():647] Logging user logs to /opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_094506-g1iix225/logs/debug.log
+2025-04-11 09:45:06,358 INFO    MainThread:3982231 [wandb_init.py:setup_run_log_directory():648] Logging internal logs to /opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_094506-g1iix225/logs/debug-internal.log
+2025-04-11 09:45:06,358 INFO    MainThread:3982231 [wandb_init.py:init():761] calling init triggers
+2025-04-11 09:45:06,358 INFO    MainThread:3982231 [wandb_init.py:init():766] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2025-04-11 09:45:06,358 INFO    MainThread:3982231 [wandb_init.py:init():784] starting backend
+2025-04-11 09:45:06,358 INFO    MainThread:3982231 [wandb_init.py:init():788] sending inform_init request
+2025-04-11 09:45:06,495 INFO    MainThread:3982231 [backend.py:_multiprocessing_setup():97] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2025-04-11 09:45:06,495 INFO    MainThread:3982231 [wandb_init.py:init():803] backend started and connected
+2025-04-11 09:45:06,496 INFO    MainThread:3982231 [wandb_init.py:init():896] updated telemetry
+2025-04-11 09:45:06,497 INFO    MainThread:3982231 [wandb_init.py:init():920] communicating run to backend with 90.0 second timeout
+2025-04-11 09:45:07,613 INFO    MainThread:3982231 [wandb_init.py:init():995] starting run threads in backend
+2025-04-11 09:45:16,822 INFO    MainThread:3982231 [wandb_run.py:_console_start():2377] atexit reg
+2025-04-11 09:45:16,822 INFO    MainThread:3982231 [wandb_run.py:_redirect():2227] redirect: wrap_raw
+2025-04-11 09:45:16,822 INFO    MainThread:3982231 [wandb_run.py:_redirect():2292] Wrapping output streams.
+2025-04-11 09:45:16,822 INFO    MainThread:3982231 [wandb_run.py:_redirect():2317] Redirects installed.
+2025-04-11 09:45:16,979 INFO    MainThread:3982231 [wandb_init.py:init():1037] run started, returning control to user process
+2025-04-11 09:45:16,979 INFO    MainThread:3982231 [wandb_run.py:_config_callback():1261] config_cb None None {'lora_num': 1, 'cond_size': 512, 'noise_size': 1024, 'test_h': 1024, 'test_w': 1024, 'train_data_dir': '/opt/liblibai-models/user-workspace/zhangyuxuan/project/gc_project/projects2/data_process/unicontrol/canny_all.jsonl', 'pretrained_model_name_or_path': '/opt/liblibai-models/model-weights/black-forest-labs/FLUX.1-dev', 'pretrained_lora_path': '/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/redux/models/blurred_model_0408/checkpoint-1000/lora.safetensors', 'revision': None, 'variant': None, 'spacial_column': 'control_canny', 'subject_column': None, 'target_column': 'source', 'caption_column': 'prompt', 'repeats': 1, 'max_sequence_length': 512, 'validation_prompt': 'A bird in a library', 'subject_test_images': ['None'], 'spatial_test_images': ['/opt/liblibai-models/user-workspace/zhangyuxuan/project/easycontrol/code0221/test_imgs/canny.jpg'], 'num_validation_images': 2, 'validation_steps': 1000, 'ranks': [128], 'network_alphas': [128], 'output_dir': '/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/models/blurred_model_0411', 'seed': None, 'train_batch_size': 1, 'num_train_epochs': 1000, 'max_train_steps': 702669000, 'checkpointing_steps': 1000, 'checkpoints_total_limit': None, 'resume_from_checkpoint': None, 'gradient_accumulation_steps': 1, 'gradient_checkpointing': False, 'learning_rate': 0.0001, 'guidance_scale': 1, 'scale_lr': False, 'lr_scheduler': 'constant', 'lr_warmup_steps': 500, 'lr_num_cycles': 1, 'lr_power': 1.0, 'dataloader_num_workers': 8, 'weighting_scheme': 'none', 'logit_mean': 0.0, 'logit_std': 1.0, 'mode_scale': 1.29, 'optimizer': 'AdamW', 'use_8bit_adam': False, 'adam_beta1': 0.9, 'adam_beta2': 0.999, 'prodigy_beta3': None, 'prodigy_decouple': True, 'adam_weight_decay': 0.0001, 'adam_weight_decay_text_encoder': 0.001, 'adam_epsilon': 1e-08, 'prodigy_use_bias_correction': True, 'prodigy_safeguard_warmup': True, 'max_grad_norm': 1.0, 'logging_dir': '/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/models/blurred_model_0411/log', 'cache_latents': False, 'report_to': 'wandb', 'mixed_precision': 'bf16', 'upcast_before_saving': False}
+2025-04-11 09:45:20,156 WARNING MsgRouterThr:3982231 [router.py:message_loop():77] message_loop has been closed
+Traceback (most recent call last):
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/wandb/sdk/interface/router_sock.py", line 28, in _read_message
+    resp = self._sock_client.read_server_response(timeout=1)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 285, in read_server_response
+    data = self._read_packet_bytes(timeout=timeout)
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 270, in _read_packet_bytes
+    raise SockClientClosedError
+wandb.sdk.lib.sock_client.SockClientClosedError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/wandb/sdk/interface/router.py", line 70, in message_loop
+    msg = self._read_message()
+  File "/opt/liblibai-models/user-workspace/miniconda3/envs/zyxdit/lib/python3.10/site-packages/wandb/sdk/interface/router_sock.py", line 30, in _read_message
+    raise MessageRouterClosedError from e
+wandb.sdk.interface.router.MessageRouterClosedError
+2025-04-11 09:45:20,208 INFO    MsgRouterThr:3982231 [mailbox.py:close():115] Closing mailbox, abandoning 1 handles.

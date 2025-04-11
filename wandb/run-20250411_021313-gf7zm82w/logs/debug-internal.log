@@ -1,0 +1,11 @@
+{"time":"2025-04-11T02:13:14.240687062+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_021313-gf7zm82w/logs/debug-core.log"}
+{"time":"2025-04-11T02:13:14.578041022+08:00","level":"INFO","msg":"created new stream","id":"gf7zm82w"}
+{"time":"2025-04-11T02:13:14.579125345+08:00","level":"INFO","msg":"stream: started","id":"gf7zm82w"}
+{"time":"2025-04-11T02:13:14.579148005+08:00","level":"INFO","msg":"handler: started","stream_id":"gf7zm82w"}
+{"time":"2025-04-11T02:13:14.579159624+08:00","level":"INFO","msg":"sender: started","stream_id":"gf7zm82w"}
+{"time":"2025-04-11T02:13:14.579169014+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"gf7zm82w"}
+{"time":"2025-04-11T02:13:15.24492777+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T02:13:27.153253698+08:00","level":"INFO","msg":"stream: closing","id":"gf7zm82w"}
+{"time":"2025-04-11T02:13:27.153368135+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T02:13:27.154056678+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T02:13:28.071764676+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}

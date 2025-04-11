@@ -1,0 +1,15 @@
+{"time":"2025-04-11T02:55:17.255596106+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/wandb/run-20250411_025516-k5nvcil5/logs/debug-core.log"}
+{"time":"2025-04-11T02:55:17.848239959+08:00","level":"INFO","msg":"created new stream","id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:17.871931923+08:00","level":"INFO","msg":"stream: started","id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:17.871952562+08:00","level":"INFO","msg":"sender: started","stream_id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:17.871967642+08:00","level":"INFO","msg":"handler: started","stream_id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:17.871980152+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:18.549594047+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-11T02:55:31.483709424+08:00","level":"INFO","msg":"stream: closing","id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:31.483752483+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-11T02:55:31.484305529+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-11T02:55:32.340952788+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-11T02:55:33.032848233+08:00","level":"INFO","msg":"handler: closed","stream_id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:33.032921891+08:00","level":"INFO","msg":"sender: closed","stream_id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:33.032872572+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"k5nvcil5"}
+{"time":"2025-04-11T02:55:33.067044972+08:00","level":"INFO","msg":"stream: closed","id":"k5nvcil5"}
