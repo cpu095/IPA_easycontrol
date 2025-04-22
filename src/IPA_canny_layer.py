@@ -146,6 +146,9 @@ class CombinedAttnProcessor_double(nn.Module):
         self.to_v_ip = nn.Linear(self.cross_attention_dim, self.hidden_size, bias=False)
         # 采用 RMSNorm 对投影后的 key 进行归一化
         self.norm_added_k = RMSNorm(128, eps=1e-5, elementwise_affine=False)
+        self.to_k_ip = self.to_k_ip.to(device=device, dtype=dtype)
+        self.to_v_ip = self.to_v_ip.to(device=device, dtype=dtype)
+        self.norm_added_k = self.norm_added_k.to(device=device, dtype=dtype)
         
     def __call__(
         self,
@@ -194,10 +197,11 @@ class CombinedAttnProcessor_double(nn.Module):
         query = attn.to_q(hidden_states)
         key = attn.to_k(hidden_states)
         value = attn.to_v(hidden_states)
-        for i in range(self.n_loras):
-            query = query + self.lora_weights[i] * self.q_loras[i](hidden_states)
-            key   = key   + self.lora_weights[i] * self.k_loras[i](hidden_states)
-            value = value + self.lora_weights[i] * self.v_loras[i](hidden_states)
+        for i in range(self.n_loras): 
+            query = query + self.lora_weights[i][0] * self.q_loras[i](hidden_states)
+            key   = key   + self.lora_weights[i][0]* self.k_loras[i](hidden_states)
+            value = value + self.lora_weights[i][0] * self.v_loras[i](hidden_states)
+            ###这里写死了lora_weights[i][0],不能改变权重###
         
         # 确定 head_dim（假设 attn.heads 已定义）
         inner_dim = key.shape[-1]
@@ -214,7 +218,7 @@ class CombinedAttnProcessor_double(nn.Module):
         
         # --- 3. image_emb 分支的处理（如果提供）---
         if image_emb is not None:
-            ip_hidden_states = image_emb
+            ip_hidden_states = image_emb.to(self.to_k_ip.weight.dtype)
             ip_key_proj = self.to_k_ip(ip_hidden_states)
             ip_val_proj = self.to_v_ip(ip_hidden_states)
             ip_key_proj = ip_key_proj.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
@@ -285,7 +289,7 @@ class CombinedAttnProcessor_double(nn.Module):
         # --- 10. 输出投影及 LoRA 后处理 ---
         main_out = attn.to_out[0](main_out)
         for i in range(self.n_loras):
-            main_out = main_out + self.lora_weights[i] * self.proj_loras[i](main_out)
+            main_out = main_out + self.lora_weights[i][0] * self.proj_loras[i](main_out)
         main_out = attn.to_out[1](main_out)
         
         if encoder_out is not None:
@@ -327,6 +331,9 @@ class CombinedAttnProcessor_single(nn.Module):
         self.to_v_ip = nn.Linear(cross_attention_dim or hidden_size, hidden_size, bias=False)
         
         self.norm_added_k = RMSNorm(128, eps=1e-5, elementwise_affine=False)
+        self.to_k_ip = self.to_k_ip.to(device=device, dtype=dtype)
+        self.to_v_ip = self.to_v_ip.to(device=device, dtype=dtype)
+        self.norm_added_k = self.norm_added_k.to(device=device, dtype=dtype)
         
         # Initialize LoRA layers
         self.n_loras = n_loras
@@ -366,9 +373,9 @@ class CombinedAttnProcessor_single(nn.Module):
 
         # Apply LoRA to projections
         for i in range(self.n_loras):
-            query = query + self.lora_weights[i] * self.q_loras[i](hidden_states)
-            key = key + self.lora_weights[i] * self.k_loras[i](hidden_states)
-            value = value + self.lora_weights[i] * self.v_loras[i](hidden_states)
+            query = query + self.lora_weights[i][0] * self.q_loras[i](hidden_states)
+            key = key + self.lora_weights[i][0] * self.k_loras[i](hidden_states)
+            value = value + self.lora_weights[i][0] * self.v_loras[i](hidden_states)
 
         # Reshape for multi-head attention
         inner_dim = key.shape[-1]
@@ -415,7 +422,7 @@ class CombinedAttnProcessor_single(nn.Module):
 
         # If image_emb is provided, integrate it into the hidden states
         if image_emb is not None:
-            ip_hidden_states = self.to_k_ip(image_emb)
+            ip_hidden_states = self.to_k_ip(image_emb).to(self.to_k_ip.weight.dtype)
             ip_hidden_states_value_proj = self.to_v_ip(image_emb)
             ip_hidden_states = ip_hidden_states.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
             ip_hidden_states_value_proj = ip_hidden_states_value_proj.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)

@@ -104,9 +104,6 @@ class FluxSingleTransformerBlock(nn.Module):
             attn_output, cond_attn_output = attn_output
 
 
-        #维度有问题，差1024
-        print("attn_output shape:", attn_output.shape)
-        print("mlp_hidden_states shape:", mlp_hidden_states.shape)
         hidden_states = torch.cat([attn_output, mlp_hidden_states], dim=2)
         
 

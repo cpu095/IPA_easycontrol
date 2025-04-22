@@ -3,13 +3,14 @@ import copy
 import logging
 import math
 import os
-import itertools
 import shutil
 from contextlib import nullcontext
 from pathlib import Path
 import re
 from safetensors.torch import save_file
+import torch.nn.functional as F
 
+import torch.nn as nn
 from PIL import Image
 import numpy as np
 import torch.utils.checkpoint
@@ -20,7 +21,7 @@ from accelerate.utils import DistributedDataParallelKwargs, ProjectConfiguration
 
 from tqdm.auto import tqdm
 from transformers import CLIPTokenizer, PretrainedConfig, T5TokenizerFast
-
+import inspect
 import diffusers
 
 from diffusers import (
@@ -39,17 +40,24 @@ from diffusers.utils import (
     is_wandb_available,
     convert_unet_state_dict_to_peft
 )
-import torch.nn as nn
+
+###
+from diffusers import FluxPriorReduxPipeline
+from diffusers.utils import load_image
+
+
+# print("jjjjj:")
+# print(inspect.getfile(load_image))
+# FluxPriorReduxPipeline.from_pretrained("/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/FLUX-redux", torch_dtype=torch.float32).to("cuda")
+
+###
+
 from src.prompt_helper import *
-from src.lora_helper import *
 from src.pipeline import FluxPipeline, resize_position_encoding, prepare_latent_subject_ids
 from src.layers import MultiDoubleStreamBlockLoraProcessor, MultiSingleStreamBlockLoraProcessor
 from src.transformer_flux import FluxTransformer2DModel
 # from src.jsonl_datasets_subject200k import make_train_dataset, collate_fn
 from src.jsonl_datasets import make_train_dataset, collate_fn
-from src.IPA_canny_layer import CombinedAttnProcessor_double,CombinedAttnProcessor_single
-from transformers import AutoProcessor, SiglipVisionModel
-
 
 if is_wandb_available():
     import wandb
@@ -78,7 +86,12 @@ def log_validation(
     generator = torch.Generator(device=accelerator.device).manual_seed(args.seed) if args.seed else None
     # autocast_ctx = torch.autocast(accelerator.device.type) if not is_final_validation else nullcontext()
     autocast_ctx = nullcontext()
+    # image = load_image("/opt/liblibai-models/dataset-images/unicontrol/images/aesthetics_6_plus_0/source_170.jpg")
+    # pipe_prior_output = pipe_prior_redux(image)
 
+    # with autocast_ctx:
+    #     images = [pipeline(**pipeline_args, generator=generator,**pipe_prior_output).images[0] for _ in range(args.num_validation_images)]
+    
     with autocast_ctx:
         images = [pipeline(**pipeline_args, generator=generator).images[0] for _ in range(args.num_validation_images)]
 
@@ -116,6 +129,7 @@ def import_model_class_from_model_name_or_path(
         return CLIPTextModel
     elif model_class == "T5EncoderModel":
         from transformers import T5EncoderModel
+        
 
         return T5EncoderModel
     else:
@@ -145,13 +159,6 @@ def parse_args(input_args=None):
         default="/tiamat-vePFS/share_data/storage/huggingface/models/black-forest-labs/FLUX.1-dev",
         required=False,
         help="Path to pretrained model or model identifier from huggingface.co/models.",
-    )
-    parser.add_argument(
-        "--pretrained_lora_path",
-        type=str,
-        default="/tiamat-vePFS/share_data/storage/huggingface/models/black-forest-labs/FLUX.1-dev",
-        required=False,
-        help="Path to pretrained model",
     )
     parser.add_argument(
         "--revision",
@@ -228,13 +235,6 @@ def parse_args(input_args=None):
         type=int,
         default=4,
         help="Number of images that should be generated during validation with `validation_prompt`.",
-    )
-    parser.add_argument(
-        "--ip_adapter_path",
-        type=str,
-        default=None,
-        required=False,
-        help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
         "--validation_steps",
@@ -481,52 +481,6 @@ def parse_args(input_args=None):
         args = parser.parse_args()
     return args
 
-class ImageProjModel(nn.Module):
-    """Projection Model
-    https://github.com/tencent-ailab/IP-Adapter/blob/main/ip_adapter/ip_adapter.py#L28
-    """
-
-    def __init__(
-        self, 
-        joint_attention_dim=1024, 
-        embeddings_dim=768, 
-        num_tokens=4
-    ):
-        super().__init__()
-        self.joint_attention_dim = joint_attention_dim
-        self.num_tokens = num_tokens
-        self.proj = nn.Linear(embeddings_dim, self.num_tokens * self.joint_attention_dim)
-        self.norm = nn.LayerNorm(self.joint_attention_dim)
-
-    def forward(self, image_embeds):
-        embeds = image_embeds
-        extra_context_tokens = self.proj(embeds).reshape(
-            -1, self.num_tokens, self.joint_attention_dim
-        )
-        extra_context_tokens = self.norm(extra_context_tokens)
-        return extra_context_tokens
-
-class MLPProjModel(torch.nn.Module):
-    def __init__(self, cross_attention_dim=768, id_embeddings_dim=512, num_tokens=4):
-        super().__init__()
-        
-        self.cross_attention_dim = cross_attention_dim
-        self.num_tokens = num_tokens
-        
-        self.proj = torch.nn.Sequential(
-            torch.nn.Linear(id_embeddings_dim, id_embeddings_dim*2),
-            torch.nn.GELU(),
-            torch.nn.Linear(id_embeddings_dim*2, cross_attention_dim*num_tokens),
-        )
-        self.norm = torch.nn.LayerNorm(cross_attention_dim)
-        
-    def forward(self, id_embeds):
-        x = self.proj(id_embeds)
-        x = x.reshape(-1, self.num_tokens, self.cross_attention_dim)
-        x = self.norm(x)
-        return x
-
-
 
 def main(args):
     if torch.backends.mps.is_available() and args.mixed_precision == "bf16":
@@ -597,7 +551,6 @@ def main(args):
         subfolder="tokenizer_2",
         revision=args.revision,
     )
-
     # import correct text encoder classes
     text_encoder_cls_one = import_model_class_from_model_name_or_path(
         args.pretrained_model_name_or_path, args.revision, subfolder="text_encoder"
@@ -642,12 +595,6 @@ def main(args):
             "Mixed precision training with bfloat16 is not supported on MPS. Please use fp16 (recommended) or fp32 instead."
         )
 
-
-    #ip-adapter (newly added)
-    image_encoder = SiglipVisionModel.from_pretrained("/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/IPA_easycontrol/siglip")
-    image_encoder.requires_grad_(False)
-
-    image_encoder.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
     transformer.to(accelerator.device, dtype=weight_dtype)
     text_encoder_one.to(accelerator.device, dtype=weight_dtype)
@@ -656,100 +603,27 @@ def main(args):
     if args.gradient_checkpointing:
         transformer.enable_gradient_checkpointing()
 
-    
-
-
-    # more image tokens
-    num_tokens = 16
-    image_proj_model = MLPProjModel(
-        cross_attention_dim=transformer.config.joint_attention_dim, # 4096
-        id_embeddings_dim=1152, 
-        num_tokens=num_tokens,
-    )
-
     #### lora_layers ####
-    lora_path = args.pretrained_lora_path
-    checkpoint = load_checkpoint(lora_path)
     lora_attn_procs = {}
     double_blocks_idx = list(range(19))
     single_blocks_idx = list(range(38))
-    number = 1
     for name, attn_processor in transformer.attn_processors.items():
         match = re.search(r'\.(\d+)\.', name)
         if match:
             layer_index = int(match.group(1))
-        
         if name.startswith("transformer_blocks") and layer_index in double_blocks_idx:
-            lora_state_dicts = {}
-            for key, value in checkpoint.items():
-                # Match based on the layer index in the key (assuming the key contains layer index)
-                if re.search(r'\.(\d+)\.', key):
-                    checkpoint_layer_index = int(re.search(r'\.(\d+)\.', key).group(1))
-                    if checkpoint_layer_index == layer_index and key.startswith("transformer_blocks"):
-                        lora_state_dicts[key] = value
-            
             print("setting LoRA Processor for", name)
-            lora_attn_procs[name] = CombinedAttnProcessor_double(
-                dim=3072, ranks=args.ranks, network_alphas=args.network_alphas, lora_weights=[1 for _ in range(args.lora_num)], device=accelerator.device, dtype=weight_dtype, cond_width=args.cond_size, cond_height=args.cond_size, n_loras=args.lora_num ,hidden_size=transformer.config.num_attention_heads * transformer.config.attention_head_dim,
-                cross_attention_dim=transformer.config.joint_attention_dim,
-                num_tokens=num_tokens,
-            ).to(accelerator.device, dtype=weight_dtype)
-            
-            # Load the weights from the checkpoint dictionary into the corresponding layers
-            for n in range(number):
-                lora_attn_procs[name].q_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.q_loras.{n}.down.weight', None)
-                lora_attn_procs[name].q_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.q_loras.{n}.up.weight', None)
-                lora_attn_procs[name].k_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.k_loras.{n}.down.weight', None)
-                lora_attn_procs[name].k_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.k_loras.{n}.up.weight', None)
-                lora_attn_procs[name].v_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.v_loras.{n}.down.weight', None)
-                lora_attn_procs[name].v_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.v_loras.{n}.up.weight', None)
-                lora_attn_procs[name].proj_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.proj_loras.{n}.down.weight', None)
-                lora_attn_procs[name].proj_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.proj_loras.{n}.up.weight', None)
-            
+            lora_attn_procs[name] = MultiDoubleStreamBlockLoraProcessor(
+                dim=3072, ranks=args.ranks, network_alphas=args.network_alphas, lora_weights=[1 for _ in range(args.lora_num)], device=accelerator.device, dtype=weight_dtype, cond_width=args.cond_size, cond_height=args.cond_size, n_loras=args.lora_num
+            )
         elif name.startswith("single_transformer_blocks") and layer_index in single_blocks_idx:
-            
-            lora_state_dicts = {}
-            for key, value in checkpoint.items():
-                # Match based on the layer index in the key (assuming the key contains layer index)
-                if re.search(r'\.(\d+)\.', key):
-                    checkpoint_layer_index = int(re.search(r'\.(\d+)\.', key).group(1))
-                    if checkpoint_layer_index == layer_index and key.startswith("single_transformer_blocks"):
-                        lora_state_dicts[key] = value
-            
-            print("setting LoRA Processor for", name)        
-            lora_attn_procs[name] = CombinedAttnProcessor_single(
-                dim=3072, ranks=args.ranks, network_alphas=args.network_alphas, lora_weights=[1 for _ in range(args.lora_num)], device=accelerator.device, dtype=weight_dtype, cond_width=args.cond_size, cond_height=args.cond_size, n_loras=args.lora_num,hidden_size=transformer.config.num_attention_heads * transformer.config.attention_head_dim,
-                cross_attention_dim=transformer.config.joint_attention_dim,
-                num_tokens=num_tokens, 
-            ).to(accelerator.device, dtype=weight_dtype)
-            # Debugging: Check if the processor has been added
-            
-            
-            # Load the weights from the checkpoint dictionary into the corresponding layers
-            for n in range(number):
-                lora_attn_procs[name].q_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.q_loras.{n}.down.weight', None)
-                lora_attn_procs[name].q_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.q_loras.{n}.up.weight', None)
-                lora_attn_procs[name].k_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.k_loras.{n}.down.weight', None)
-                lora_attn_procs[name].k_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.k_loras.{n}.up.weight', None)
-                lora_attn_procs[name].v_loras[n].down.weight.data = lora_state_dicts.get(f'{name}.v_loras.{n}.down.weight', None)
-                lora_attn_procs[name].v_loras[n].up.weight.data = lora_state_dicts.get(f'{name}.v_loras.{n}.up.weight', None)
+            print("setting LoRA Processor for", name)
+            lora_attn_procs[name] = MultiSingleStreamBlockLoraProcessor(
+                dim=3072, ranks=args.ranks, network_alphas=args.network_alphas, lora_weights=[1 for _ in range(args.lora_num)], device=accelerator.device, dtype=weight_dtype, cond_width=args.cond_size, cond_height=args.cond_size, n_loras=args.lora_num
+            )
         else:
             lora_attn_procs[name] = attn_processor
-    ######################
-    #####IP-Adapter######
-    if args.ip_adapter_path is not None:
-        print(f"loading image_proj_model ...")
-        state_dict = torch.load(args.ip_adapter_path, map_location="cpu")
-        image_proj_model.load_state_dict(state_dict["image_proj"], strict=False)
-        # adapter_modules = torch.nn.ModuleList(transformer.attn_processors.values())
-        # adapter_modules.load_state_dict(state_dict["ip_adapter"])
-
-
-
     transformer.set_attn_processor(lora_attn_procs)
-    # Debugging: Verify processor types
-    
-
     transformer.train()
     for n, param in transformer.named_parameters():
         if '_lora' not in n:
@@ -783,7 +657,7 @@ def main(args):
         cast_training_params(models, dtype=torch.float32)
 
     # Optimization parameters
-    params_to_optimize = [p for p in itertools.chain(transformer.parameters(), image_proj_model.parameters()) if p.requires_grad]
+    params_to_optimize = [p for p in transformer.parameters() if p.requires_grad]
     transformer_parameters_with_lr = {"params": params_to_optimize, "lr": args.learning_rate}
     print(sum([p.numel() for p in transformer.parameters() if p.requires_grad]) / 1000000, 'parameters')
 
@@ -829,8 +703,8 @@ def main(args):
         power=args.lr_power,
     )
 
-    transformer,image_proj_model, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        transformer,image_proj_model, optimizer, train_dataloader, lr_scheduler
+    transformer, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+        transformer, optimizer, train_dataloader, lr_scheduler
     )
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
@@ -885,9 +759,8 @@ def main(args):
         
     for epoch in range(first_epoch, args.num_train_epochs):
         transformer.train()
-        image_proj_model.train()
         for step, batch in enumerate(train_dataloader):
-            models_to_accumulate = [transformer,image_proj_model]
+            models_to_accumulate = [transformer]
             with accelerator.accumulate(models_to_accumulate):
                 
                 tokens = [batch["text_ids_1"], batch["text_ids_2"]]
@@ -897,8 +770,22 @@ def main(args):
                 text_ids = text_ids.to(dtype=vae.dtype, device=accelerator.device)
                 
                 pixel_values = batch["pixel_values"].to(dtype=vae.dtype)
+                ###
+                
+                
+                # pipe_prior_redux = FluxPriorReduxPipeline.from_pretrained("/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/FLUX-redux", torch_dtype=torch.bfloat16)
+                # pipe_prior_output = pipe_prior_redux(pixel_values)
+                immage=batch["target_images"]
+                
+                
+
+                pipe_prior_redux = FluxPriorReduxPipeline.from_pretrained("/opt/liblibai-models/user-workspace/songyiren/FYP/sjc/FLUX-redux", torch_dtype=torch.bfloat16).to("cuda")
+                pipe_prior_output = pipe_prior_redux(immage)
+                ###
                 height_ = 2 * (int(pixel_values.shape[-2]) // vae_scale_factor)
                 width_ = 2 * (int(pixel_values.shape[-1]) // vae_scale_factor)
+
+
 
                 model_input = vae.encode(pixel_values).latent_dist.sample()
                 model_input = (model_input - vae_config_shift_factor) * vae_config_scaling_factor
@@ -993,35 +880,26 @@ def main(args):
                     guidance = guidance.expand(model_input.shape[0])
                 else:
                     guidance = None
-                
-                # IP-Adapter (newly added)
-                with torch.no_grad():
-        
-                    image_embeds = image_encoder(batch["clip_images"].to(accelerator.device, dtype=vae.dtype)).pooler_output
-                    image_embeds = image_embeds.to(dtype=vae.dtype, device=accelerator.device)
-
-                ip_tokens = image_proj_model(image_embeds) # torch.Size([bsz, num_tokens, 4096])
-                
-                # # 打印 transformer 的 forward 方法签名
-                # import inspect
-                # print(inspect.signature(transformer.forward))
-                # print(transformer)
-                # # IP-Adapter (newly added)  
-                
+                # print("prompt_embeds shape:", pipe_prior_output.prompt_embeds.shape)
+                # print("pooled_prompt_embeds shape:", prompt_embeds.shape)
 
                 # Predict the noise residual
+                # transformer是FluxTransformer2DModel类
                 model_pred = transformer(
                     hidden_states=packed_noisy_model_input,
                     # YiYi notes: divide it by 1000 for now because we scale it by 1000 in the transforme rmodel (we should not keep it but I want to keep the inputs same for the model for testing)
                     cond_hidden_states=cond_packed_noisy_model_input,
                     timestep=timesteps / 1000,
                     guidance=guidance,
-                    pooled_projections=pooled_prompt_embeds,
-                    encoder_hidden_states=prompt_embeds,
-                    image_emb=ip_tokens.to(device=accelerator.device, dtype=weight_dtype),
+                    pooled_projections=pipe_prior_output.pooled_prompt_embeds,
+                    encoder_hidden_states=pipe_prior_output.prompt_embeds, 
+                    image_emb=ip_tokens.to(
+                        device=accelerator.device, dtype=weight_dtype
+                    ),
+                    # pooled_projections=pooled_prompt_embeds,
+                    # encoder_hidden_states=prompt_embeds, 
                     txt_ids=text_ids,
                     img_ids=latent_image_ids,
-                    joint_attention_kwargs=None,
                     return_dict=False,
                 )[0]
                 
@@ -1048,7 +926,7 @@ def main(args):
                 loss = loss.mean()
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
-                    params_to_clip = [p for p in itertools.chain(transformer.parameters(), image_proj_model.parameters()) if p.requires_grad]
+                    params_to_clip = (transformer.parameters())
                     accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
 
                 optimizer.step()
@@ -1090,11 +968,6 @@ def main(args):
                             lora_state_dict,
                             os.path.join(save_path, "lora.safetensors")
                         )
-
-                        # 新增代码：保存 pipe_prior_redux 模块的参数
-                        unwrapped_pipe_state = accelerator.unwrap_model(image_proj_model).state_dict()
-                        save_file(unwrapped_pipe_state, os.path.join(save_path, "image_proj_model.safetensors"))
-
                         logger.info(f"Saved state to {save_path}")
 
             logs = {"loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
@@ -1104,6 +977,7 @@ def main(args):
             if accelerator.is_main_process:
                 if args.validation_prompt is not None and global_step % args.validation_steps == 0:
                     # create pipeline
+                    
                     pipeline = FluxPipeline.from_pretrained(
                         args.pretrained_model_name_or_path,
                         vae=vae,
@@ -1113,6 +987,7 @@ def main(args):
                         revision=args.revision,
                         variant=args.variant,
                         torch_dtype=weight_dtype,
+                        
                     )
 
                     ######## 
@@ -1128,7 +1003,8 @@ def main(args):
                     else:
                         spatial_ls = []
                     ########
-
+##这里缺东西
+                    
                     pipeline_args = {"prompt": args.validation_prompt,
                                      "spatial_images": spatial_ls,
                                      "subject_images": subject_ls,
@@ -1138,6 +1014,7 @@ def main(args):
                                      "guidance_scale": 3,
                                      "num_inference_steps": 20,
                                      "max_sequence_length": 512,
+                                     
                                      }
                     
                     images = log_validation(
